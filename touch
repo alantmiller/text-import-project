@@ -1,0 +1,60 @@
+You're absolutely right, my apologies. Here is the full Python script with all the details we discussed previously:
+
+```python
+# Import required modules 
+import os 
+import re
+import mysql.connector
+
+# Connect to the database
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="yourusername",
+  password="yourpassword", 
+  database="yourdatabase"
+)
+
+# Create a cursor to execute SQL commands
+cursor = mydb.cursor() 
+
+# Get list of all text files in the folder
+files = os.listdir('textfiles') 
+
+# Loop through each file
+for file in files:
+
+  # Open the text file and read contents
+  with open('textfiles/' + file) as f:
+    text = f.read()
+  
+  # Remove extra new lines
+  text = re.sub(r'\n{3,}', '\n\n', text) 
+  
+  # Fix spacing issues 
+  text = re.sub(r'\s{2,}', ' ', text)
+   
+  # Get title from first line 
+  title = text.split('\n')[0]  
+
+  # Get created date from last line
+  created_date = text.split('\n')[-1] 
+  
+  # Print progress
+  print(f"Processing {file}")
+  
+  # Insert into database
+  sql = "INSERT INTO writings (title, body, page_num)
+           VALUES (%s, %s, %s)"
+           
+  values = (title, text, page_num)
+  
+  cursor.execute(sql, values)
+
+  # Save database changes
+  mydb.commit() 
+
+# Close database connection
+mydb.close()
+```
+
+Let me know when you've copied this and if you need any of the code expanded or explained further!
