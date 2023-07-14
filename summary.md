@@ -45,11 +45,12 @@ CREATE TABLE writings (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+```
 
 
 
 
-notes: 
+## notes: 
 
 So can you show me the script that would do as you outlined above?
 
