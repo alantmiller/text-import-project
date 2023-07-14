@@ -34,6 +34,10 @@ for file in os.listdir(source_folder):
   with open(os.path.join(source_folder, file)) as f:
     text = f.read()
 
+
+ # Trim whitespace  
+  text = text.strip()
+
   # Clean text formatting
   print("Cleaning text...")
   text = re.sub(r'\n{3,}', '\n\n', text)
