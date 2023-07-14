@@ -34,22 +34,34 @@
 ## Database Schema
 
 ```
--- Raw SQL
-CREATE TABLE writings (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  source_id INT, 
-  title VARCHAR(255),
-  body TEXT,
-  page_num INT,
-  created_date DATE,
+-- Create Sources table
+CREATE TABLE sources (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  source VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Populate Sources table
+INSERT INTO sources (source)
+VALUES
+  ("Idle Thoughts"),
+  ("My Dedication"), 
+  ("Memoirs");
+
+-- Raw SQL
+CREATE TABLE writings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  source_id INT,
+  title VARCHAR(255), 
+  body TEXT,
+  page_num INT NULL, 
+  created_date DATE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 ```
-
-
-
-
 ## notes: 
 
 The database table's name will be "writings" and contain the fields id, title, body, created_date, created_at, and updated_at. The created_at and update_at are standard fare in the Laravel framework which will be used for this project. When creating the database please keep Laravel's standards in mind. 
