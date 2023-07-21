@@ -2,15 +2,26 @@
 import os # Provides functions for working with files and folders
 import re # Used for regular expressions to find/replace text
 import mysql.connector # Database connector for MySQL
+import json
+
+# Load config file
+with open('config.import.json') as f:
+  config = json.load(f)
+
+# Database credentials from config  
+db_host = config['db']['host']
+db_user = config['db']['user']
+db_pass = config['db']['password']
+db_name = config['db']['name']
 
 # Connect to the database 
 # Replace with your real connection settings
 print("Connecting to database...")
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="yourusername",
-  password="yourpassword",
-  database="yourdatabase"
+  host=db_host,
+  user=db_user,
+  password=db_pass,
+  database=db_name
 )
 print("Connected!\n")
 
@@ -19,8 +30,8 @@ cursor = mydb.cursor()
 print("Cursor created.\n")
 
 # Set source and destination folders
-source_folder = 'original_texts'
-dest_folder = 'cleaned_texts'
+source_folder = config['folders']['source'] 
+dest_folder = config['folders']['destination']
 
 # Loop through all text files in source folder
 print("Processing files...")
