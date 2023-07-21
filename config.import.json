@@ -8,5 +8,12 @@
   "folders": {
     "source": "original_texts",
     "destination": "cleaned_texts"
-  }
+  },
+  
+  // Environment: 
+  // - development
+  // - production
+  // - staging 
+  // - testing
+  "environment": "development"
 }
