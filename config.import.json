@@ -1,0 +1,12 @@
+{
+  "db": {
+    "host": "localhost",
+    "user": "dbuser",
+    "password": "dbpassword", 
+    "name": "mydatabase"
+  },
+  "folders": {
+    "source": "original_texts",
+    "destination": "cleaned_texts"
+  }
+}
