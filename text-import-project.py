@@ -14,6 +14,21 @@ db_user = config['db']['user']
 db_pass = config['db']['password']
 db_name = config['db']['name']
 
+environment = config['environment']
+
+  # Set max files based on environment
+  if environment == 'production':
+    max_files = None 
+  else:
+    if environment == 'development':
+      max_files = 50
+    elif environment == 'staging':  
+      max_files = 100
+    elif environment == 'testing':
+      max_files = 20
+    else:
+      max_files = 50
+
 # Connect to the database 
 # Replace with your real connection settings
 print("Connecting to database...")
@@ -33,9 +48,19 @@ print("Cursor created.\n")
 source_folder = config['folders']['source'] 
 dest_folder = config['folders']['destination']
 
+# Loop through files
+count = 0
+
 # Loop through all text files in source folder
 print("Processing files...")
 for file in os.listdir(source_folder):
+
+  count += 1
+  
+    # Check if hit limit
+  if count >= max_files:
+    print(f"Reached limit of {max_files} files") 
+    break
 
   # Print filename we are starting
   print(f"Starting: {file}\n")
