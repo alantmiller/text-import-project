@@ -8,12 +8,6 @@ import json
 with open('config.import.json') as f:
   config = json.load(f)
 
-# Database credentials from config  
-db_host = config['db']['host']
-db_user = config['db']['user']
-db_pass = config['db']['password']
-db_name = config['db']['name']
-
 environment = config['environment']
 
   # Set max files based on environment
@@ -30,13 +24,12 @@ environment = config['environment']
       max_files = 50
 
 # Connect to the database 
-# Replace with your real connection settings
 print("Connecting to database...")
 mydb = mysql.connector.connect(
-  host=db_host,
-  user=db_user,
-  password=db_pass,
-  database=db_name
+  host=config['db']['host'],
+  user=config['db']['user'],
+  password=config['db']['password'],
+  database=config['db']['name']
 )
 print("Connected!\n")
 
