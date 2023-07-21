@@ -45,7 +45,6 @@ for file in os.listdir(source_folder):
   with open(os.path.join(source_folder, file)) as f:
     text = f.read()
 
-
  # Trim whitespace  
   text = text.strip()
 
@@ -68,6 +67,10 @@ for file in os.listdir(source_folder):
 
   # Print progress 
   print(f"Processing: {file}\n")
+
+  # Check if record exists
+select_sql = "SELECT id FROM writings WHERE source_id = %s AND id = %s"
+cursor.execute(select_sql, (source_id, id))
 
   # Insert record into database
   print("Inserting to database...")
