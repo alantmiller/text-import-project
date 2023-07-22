@@ -88,33 +88,29 @@ try:
             print("Inserting to database...")
             sql = "INSERT INTO writings (source_id, id, title, body, page_num, created_date) VALUES (%s, %s, %s, %s, %s, %s)"     
             values = (source_id, id, title, text, page_num, created_date)
-
             cursor.execute(sql, values)
-
             print("Inserted to database!\n")
-
             mydb.commit()
 
         else:
+            # Record exists, update it
+            print("Updating record...")
+            update_sql = "
+            UPDATE writings
+            SET title = %s, body = %s, page_num = %s, created_date = %s
+            WHERE source_id = %s AND id = %s"
+            
+            cursor.execute(update_sql, (title, text, page_num, created_date, source_id, id))
+            print("Record updated!\n")
+            mydb.commit()
+            
+        # Write clean text to new file
+        print("Writing clean file...")
+        cleaned_file = os.path.join(dest_folder, file)
+        with open(cleaned_file, 'w') as f:
+            f.write(text)
 
-          print("Updating record...")
-          update_sql = "
-          UPDATE writings
-          SET title = %s, body = %s, page_num = %s, created_date = %s
-          WHERE source_id = %s AND id = %s"
-    
-          cursor.execute(update_sql, (title, text, page_num, created_date, source_id, id))
-
-          print("Record updated!\n")
-          mydb.commit()
-
-          # Write clean text to new file
-          print("Writing clean file...")
-          cleaned_file = os.path.join(dest_folder, file)
-          with open(cleaned_file, 'w') as f:
-              f.write(text)
-
-          print(f"Wrote to {cleaned_file}\n")
+        print(f"Wrote to {cleaned_file}\n")
 
     # Close the cursor
     cursor.close()
