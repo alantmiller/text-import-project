@@ -35,22 +35,135 @@ class TextFileProcessor:
 
 def process_files(self):
     """
-    Process text files located in the source folder.
-    """
-    # Create a cursor to execute SQL commands
-    cursor = self.mydb.cursor()
+    Process all files in the source folder.
 
-    # Loop through all text files in source folder
-    for count, file in enumerate(os.listdir(self.source_folder), start=1):
+    Returns
+    -------
+    None
+    """
+    # Get list of files in source folder
+    file_list = self.get_file_list()
+
+    # Loop through all files in source folder
+    for count, file in enumerate(file_list, start=1):  # enumerate gives us automatic counting
+
         # Check if hit limit
-        if self.max_files and count > self.max_files:
-            print(f"Reached limit of {self.max_files} files") 
+        if self.max_files and count > self.max_files:  # checking if max_files is not None before comparing
+            print(f"Reached limit of {self.max_files} files")
             break
 
-        # Process individual file
-        self.process_file(file)
+        # Print filename we are starting
+        print(f"Starting: {file}\n")
 
-    cursor.close()
+        # Get full file path
+        file_path = os.path.join(self.source_folder, file)
+
+        # Process individual file
+        self.process_file(file, file_path)
+
+
+    def process_file(self, file_name, file_path):
+    """
+    Process a single file.
+
+    Parameters
+    ----------
+    file_name : str
+        a string representing the name of the file to process
+    file_path : str
+        a string representing the path of the file to process
+
+    Returns
+    -------
+    None
+    """
+    # Parse filename into variables
+    source_id, id, page_num = self.parse_filename(file_name)
+
+    # Extract data from file
+    title, text, created_date = self.extract_data_from_file(file_path)
+
+    # Check if record exists
+    exists = self.check_record_exists(source_id, id)
+
+    if not exists:
+        # Record does not exist, insert it
+        self.insert_record(source_id, id, title, text, page_num, created_date)
+    else:
+        # Record exists, update it
+        self.update_record(source_id, id, title, text, page_num, created_date)
+
+    # Write clean text to new file
+    self.write_clean_file(file_name, text)
+
+
+def is_valid_filename(self, file):
+    """
+    Validate the file name.
+
+    Parameters
+    ----------
+    file : str
+        a string representing the name of the file to validate
+
+    Returns
+    -------
+    bool
+        True if the filename is valid, False otherwise
+    """
+    # The filename is expected to be in the format: source_id-id-page_num.txt
+    match = re.fullmatch(r'\d{2}-\d{3}-\d{3}\.txt', file)
+    return match is not None
+
+    
+    def extract_metadata_from_filename(self, file):
+    """
+    Extract metadata from the filename.
+
+    Parameters
+    ----------
+    file : str
+        a string representing the name of the file to extract metadata from
+
+    Returns
+    -------
+    tuple
+        a tuple containing the source_id, id, and page_num extracted from the filename
+    """
+    # The filename is expected to be in the format: source_id-id-page_num.txt
+    parts = file.split('-')
+    source_id, id, page_num = parts[0], parts[1], parts[2].split('.')[0]
+    return source_id, id, page_num
+
+def extract_data_from_file(self, file_path):
+    """
+    Extract data from the file.
+
+    Parameters
+    ----------
+    file_path : str
+        a string representing the path of the file to extract data from
+
+    Returns
+    -------
+    tuple
+        a tuple containing the title, cleaned text and created date
+    """
+    # Open file and read text
+    with open(file_path) as f:
+        text = f.read()
+
+    # Strip leading and trailing whitespace
+    text = text.strip()
+
+    # Clean text formatting
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = re.sub(r'\s{2,}', ' ', text)
+
+    # Extract title and date
+    title, created_date = text.split('\n')[0], text.split('\n')[-1]
+
+    return title, text, created_date
 
 
     def clean_text(self, text):
