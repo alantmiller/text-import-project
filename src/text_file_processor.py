@@ -181,6 +181,17 @@ class TextFileProcessor:
         except mysql.connector.Error as err:
             print(f"Something went wrong with the SQL execution: {err}")
 
+    def close_db_connection(self):
+        """
+        This method closes the connection to the MySQL database.
+        """
+        try:
+            self.cursor.close()
+            self.mydb.close()
+            print("Database connection closed.")
+        except mysql.connector.Error as err:
+            print(f"Something went wrong when closing the database connection: {err}")
+    
     def write_cleaned_file(self, file, text):
         """
         This method writes the cleaned text to a new file in the destination folder.
@@ -193,14 +204,5 @@ class TextFileProcessor:
         with open(cleaned_file, 'w') as f:
             f.write(text)
 
-    def close_db_connection(self):
-        """
-        This method closes the connection to the MySQL database.
-        """
-        try:
-            self.cursor.close()
-            self.mydb.close()
-            print("Database connection closed.")
-        except mysql.connector.Error as err:
-            print(f"Something went wrong when closing the database connection: {err}")
+
 
