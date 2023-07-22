@@ -1,7 +1,8 @@
-import os
-import re
-import mysql.connector
-import json
+# Import the modules needed
+import os  # Provides functions for working with files and folders
+import re  # Used for regular expressions to find/replace text
+import mysql.connector  # Database connector for MySQL
+import json  # Provides JSON encoder and decoder
 
 class TextFileProcessor:
     """
