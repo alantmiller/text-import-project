@@ -72,4 +72,46 @@ Please implement a `TextFileProcessor` class to process OCR extracted text files
 
 - JSON config file for DB/paths
 
-Let me know if any requirements need clarification or expansion!
+# TextFileProcessor Implementation Outline
+
+**High Level Steps**
+
+1. Set up configuration
+    - Read config file with DB credentials and file paths
+
+2. Implement text cleaning functions
+    - Functions to clean whitespace, fix spacing, parse titles/dates etc. 
+    - Logging for unparsable files
+
+3. Create SQLAlchemy models
+    - Define Sources and Writings models
+    - Mappers to DB tables   
+
+4. Extract data from input files
+    - Open each file and extract text
+    - Call cleaning functions to fix text issues 
+    - Try to extract title and date
+
+5. Write output files
+    - Write cleaned text to output folder
+    - Retain line formatting
+
+6. Load data to database
+    - Create Source entries  
+    - Create Writing entries for each file
+    - Commit to DB
+
+7. Testing
+    - Unit tests for all key functions
+    - End-to-end integration test
+       
+8. Refactoring and optimization
+    - Improve modularity and reusability
+    - Optimize bottlenecks
+    - Add configurability
+    - Improve logging and error handling
+
+9. Documentation  
+    - Comments for all classes and functions
+    - Usage docs
+    - CHANGELOG
