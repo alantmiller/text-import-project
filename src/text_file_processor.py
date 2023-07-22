@@ -1,3 +1,13 @@
+"""
+A usage example:
+
+from src.text_file_processor import TextFileProcessor
+
+processor = TextFileProcessor('config/config_development.json')
+processor.process_files()
+
+"""
+
 # Import the modules needed
 import os  # Provides functions for working with files and folders
 import re  # Used for regular expressions to find/replace text
