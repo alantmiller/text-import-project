@@ -73,12 +73,15 @@ try:
             print(f"Unexpected filename format: {file}. Skipping this file.")
             continue
 
-        # Check if parts are numeric
-        if not(filename[0].isdigit() and filename[1].isdigit() and filename[2].split('.')[0].isdigit()):
-            print(f"Non-numeric parts in filename: {file}. Skipping this file.")
+        # Check if parts are numeric and have the expected lengths
+        if not(filename[0].isdigit() and len(filename[0]) == 2 and
+               filename[1].isdigit() and len(filename[1]) == 3 and
+               filename[2].split('.')[0].isdigit() and len(filename[2].split('.')[0]) == 3):
+            print(f"Filename parts are not numeric or have incorrect length: {file}. Skipping this file.")
             continue
 
-        # Proceed with extraction only if the filename format is correct and parts are numeric
+        # Proceed with extraction only if the filename format is 
+        # correct and parts are numeric with expected lengths
         source_id, id, page_num = filename[0], filename[1], filename[2].split('.')[0]  # direct assignments
 
         # Extract title and date
