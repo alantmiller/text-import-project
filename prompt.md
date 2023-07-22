@@ -1,56 +1,75 @@
-Please rewrite and implement the TextFileProcessor class provided previously to process text files extracted from a document storage system. 
+# Text File Processor
 
-The requirements are:
+Please implement a `TextFileProcessor` class to process OCR extracted text files.
 
-- The system extracts text files from a specific directory, each file is named like `source-id-page.txt`
+## Requirements
 
-- Each file may contain a title on the first line and/or a created date on the last line, but these are not guaranteed to exist so this needs to be accounted for in the code and database design.
+**Input Files**
 
-- The files need to be processed to clean the text, extract metadata, and insert into a MariaDB SQL database. When cleaning a file...
+- Extracted from specific input directory
+- Named like `source-id-page.txt` 
+- May contain optional title and created date
 
-    - all leading and trailing extra spaces should be trimmed
-    - Titles are almost always in ALL CAPS and they will be the first line if they exist
-    - Dates if provided are usually the very last line of a given file and will be in a format that is something likke08-27-1969.
-    - There are many words that wound up with extra spaces in them such that the word cat might be printed like "c a t" please do your best to identify these when they occur and fix them.
-    - On most of the writings, the writer used a convention where every new line starts with a capital Letter.
-    - some of these files are hot formatted correctly, that is the line breaks etc, they need to be fixed. 
+**Text Cleaning** 
 
-- The database contains tables:
+- Remove leading and trailing whitespace
+- Reduce extra spaces between words to single spaces
+- Standardize line breaks to 2 lines between paragraphs   
+- Fix word breaks like "c a t" into consolidated words 
+- Handle common OCR errors and misspellings
+- Try to parse title and date from files
+  - Titles are often ALL CAPS on first line
+  - Dates may be in formats like 08-27-1969 on last line
+- Log any unparsable titles/dates to `processing_errors.log`
 
-    - `writings` table:
+**Output**  
 
-        ```sql
-        CREATE TABLE writings (
-          id INT PRIMARY KEY AUTO_INCREMENT,
-          source_id VARCHAR(100),
-          title VARCHAR(255), 
-          body TEXT,
-          created_date DATETIME, 
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-        ```
+- Write cleaned text to output folder
+- Use original filename with `.cleaned.txt` suffix
 
-    - `sources` table:  
+**Database (MariaDB and SQLAlchemy)**
 
-        ```sql
-         CREATE TABLE sources (
-           id INT PRIMARY KEY AUTO_INCREMENT,
-           source VARCHAR(100),
-           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  
-         )
-        ```
+- `sources` table:
 
-- After processing, the cleaned text should be written to an `output` folder  
+    ```sql
+    CREATE TABLE sources (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      source VARCHAR(100),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
 
-- The code needs to be production-ready with:
+    INSERT INTO sources (source) VALUES  
+      ('Idle Thoughts'),  
+      ('Dedication'),
+      ('Memoirs')
+    ```
 
-    - Proper OOP design and type annotations
-    - Use SQLAlchemy for database access because it provides an ORM that abstracts away SQL details and enables easier testing
-    - Input validation and robust error handling
-    - Configurable logging
-    - Modular and reusable code
-    - Unit tests for key functions
-    - Parallel processing for efficiency
-    - Well commented for maintainability
+- `writings` table:
+
+    ```sql
+    CREATE TABLE writings (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      source_id VARCHAR(100),
+      title VARCHAR(255), 
+      body TEXT,
+      created_date DATETIME,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  
+    )
+    ```
+
+**Code Quality**
+
+- Modular OOP design 
+- Robust error handling
+- Unit tests
+- Configurable logging
+- Parallel processing 
+- Comments
+
+**Configuration** 
+
+- JSON config file for DB/paths
+
+Let me know if any requirements need clarification or expansion!
