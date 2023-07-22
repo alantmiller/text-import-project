@@ -15,5 +15,7 @@
   // - production
   // - staging 
   // - testing
-  "environment": "development"
+  "environment": "development",
+
+  "max_files": 1000
 }

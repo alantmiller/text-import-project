@@ -1,247 +1,206 @@
-"""
-A usage example:
-
-from src.text_file_processor import TextFileProcessor
-
-processor = TextFileProcessor('config/config_development.json')
-processor.process_files()
-
-"""
-
-# Import the modules needed
-import os  # Provides functions for working with files and folders
-import re  # Used for regular expressions to find/replace text
-import mysql.connector  # Database connector for MySQL
-import json  # Provides JSON encoder and decoder
+# Import the necessary libraries
+import os  # Provides functions for interacting with the operating system
+import re  # Provides regular expression matching operations
+import json  # Used for JSON manipulation
+import mysql.connector  # Provides methods to connect to a MySQL database
 
 class TextFileProcessor:
     """
-    Class for processing text files. Handles reading and cleaning the files, as well as inserting and updating records in the database.
+    This class is used to process text files. It provides methods to read and clean files as well as
+    inserting and updating records in a MySQL database.
     """
 
-def __init__(self, config_file):
+    def __init__(self, config_file, max_files=None):
         """
-        Construct a new 'TextFileProcessor' object.
+        Constructor for the 'TextFileProcessor' class.
 
-        :param config_file: The path to a JSON file containing the database and file configuration
+        :param config_file: A string representing the path to the JSON file containing the database configuration.
+        :param max_files: An integer representing the maximum number of files to process.
         """
-        # Load the configuration from the specified file
+        # Open and load the configuration file
         with open(config_file) as f:
             self.config = json.load(f)
 
-        # Connect to the database
-        self.mydb = mysql.connector.connect(
-            host=self.config['db']['host'],
-            user=self.config['db']['user'],
-            password=self.config['db']['password'],
-            database=self.config['db']['name']
-        )
+        # Connect to the MySQL database
+        self.connect_to_db()
 
-        # Create a cursor for executing SQL commands
-        self.cursor = self.mydb.cursor()
-
-        # Set the source and destination folders from the config
+        # Set the source and destination folders from the configuration file
         self.source_folder = self.config['folders']['source']
         self.dest_folder = self.config['folders']['destination']
 
-def process_files(self):
-    """
-    Process all files in the source folder.
+        # Set the maximum number of files to process
+        self.max_files = max_files
 
-    Returns
-    -------
-    None
-    """
-    # Get list of files in source folder
-    file_list = self.get_file_list()
-
-    # Loop through all files in source folder
-    for count, file in enumerate(file_list, start=1):  # enumerate gives us automatic counting
-
-        # Check if hit limit
-        if self.max_files and count > self.max_files:  # checking if max_files is not None before comparing
-            print(f"Reached limit of {self.max_files} files")
-            break
-
-        # Print filename we are starting
-        print(f"Starting: {file}\n")
-
-        # Get full file path
-        file_path = os.path.join(self.source_folder, file)
-
-        # Process individual file
-        self.process_file(file, file_path)
-
-
-def process_file(self, file_name, file_path):
-    """
-    Process a single file.
-
-    Parameters
-    ----------
-    file_name : str
-        a string representing the name of the file to process
-    file_path : str
-        a string representing the path of the file to process
-
-    Returns
-    -------
-    None
-    """
-    # Parse filename into variables
-    source_id, id, page_num = self.parse_filename(file_name)
-
-    # Extract data from file
-    title, text, created_date = self.extract_data_from_file(file_path)
-
-    # Check if record exists
-    exists = self.check_record_exists(source_id, id)
-
-    if not exists:
-        # Record does not exist, insert it
-        self.insert_record(source_id, id, title, text, page_num, created_date)
-    else:
-        # Record exists, update it
-        self.update_record(source_id, id, title, text, page_num, created_date)
-
-    # Write clean text to new file
-    self.write_clean_file(file_name, text)
-
-
-def is_valid_filename(self, file):
-    """
-    Validate the file name.
-
-    Parameters
-    ----------
-    file : str
-        a string representing the name of the file to validate
-
-    Returns
-    -------
-    bool
-        True if the filename is valid, False otherwise
-    """
-    # The filename is expected to be in the format: source_id-id-page_num.txt
-    match = re.fullmatch(r'\d{2}-\d{3}-\d{3}\.txt', file)
-    return match is not None
-
-    
-def extract_metadata_from_filename(self, file):
-    """
-    Extract metadata from the filename.
-
-    Parameters
-    ----------
-    file : str
-        a string representing the name of the file to extract metadata from
-
-    Returns
-    -------
-    tuple
-        a tuple containing the source_id, id, and page_num extracted from the filename
-    """
-    # The filename is expected to be in the format: source_id-id-page_num.txt
-    parts = file.split('-')
-    source_id, id, page_num = parts[0], parts[1], parts[2].split('.')[0]
-    return source_id, id, page_num
-
-def extract_data_from_file(self, file_path):
-    """
-    Extract data from the file.
-
-    Parameters
-    ----------
-    file_path : str
-        a string representing the path of the file to extract data from
-
-    Returns
-    -------
-    tuple
-        a tuple containing the title, cleaned text and created date
-    """
-    # Open file and read text
-    with open(file_path) as f:
-        text = f.read()
-
-    # Strip leading and trailing whitespace
-    text = text.strip()
-
-    # Clean text formatting
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    text = re.sub(r'\s{2,}', ' ', text)
-
-    # Extract title and date
-    title, created_date = text.split('\n')[0], text.split('\n')[-1]
-
-    return title, text, created_date
-
-
-def clean_text(self, text):
+    def connect_to_db(self):
         """
-        Clean the provided text by stripping leading/trailing whitespace and fixing formatting.
-
-        :param text: The original text
-        :return: The cleaned text
+        This method connects to a MySQL database using the configuration settings loaded from the configuration file.
         """
-        text = text.strip()
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        text = re.sub(r'\s{2,}', ' ', text)
-        return text
+        try:
+            self.mydb = mysql.connector.connect(
+                host=self.config['db']['host'],
+                user=self.config['db']['user'],
+                password=self.config['db']['password'],
+                database=self.config['db']['name']
+            )
 
-def parse_filename(self, file):
-        """
-        Parse the provided filename into the necessary variables.
+            # Create a cursor for executing SQL commands
+            self.cursor = self.mydb.cursor()
 
-        :param file: The filename
-        :return: A tuple containing the source_id, id, and page_num
-        """
-        filename = file.split('-')
-        source_id, id, page_num = filename[0], filename[1], filename[2].split('.')[0]
-        return source_id, id, page_num
+        except mysql.connector.Error as err:
+            print(f"Error connecting to the database: {err}")
+            raise SystemExit
 
-def extract_metadata(self, text):
+    def process_files(self):
         """
-        Extract the title and date from the provided text.
+        This method processes all files in the source folder.
+        """
+        # Get a list of all files in the source folder
+        file_list = os.listdir(self.source_folder)
 
-        :param text: The cleaned text
-        :return: A tuple containing the title and date
-        """
-        title, created_date = text.split('\n')[0], text.split('\n')[-1]
-        return title, created_date
+        if file_list:
+            total_files = len(file_list)
 
-def handle_database_record(self, source_id, id, title, text, page_num, created_date):
-        """
-        Check if a corresponding record exists in the database. If it does, update it, if not, insert a new record.
+            # Iterate over all files in the source folder
+            for count, file in enumerate(file_list, start=1):
+                # If the number of processed files is greater than the maximum, stop processing
+                if self.max_files and count > self.max_files:
+                    print(f"Reached limit of {self.max_files} files")
+                    break
 
-        :param source_id: The source id
-        :param id: The id
-        :param title: The title
-        :param text: The cleaned text
-        :param page_num: The page number
-        :param created_date: The creation date
-        """
-        select_sql = "SELECT id FROM writings WHERE source_id = %s AND id = %s"
-        self.cursor.execute(select_sql, (source_id, id))
-        
-        if self.cursor.fetchone() is None:
-            # If no record is found, then insert the new record
-            insert_sql = "INSERT INTO writings (source_id, id, title, body, page_num, created_date) VALUES (%s, %s, %s, %s, %s, %s)"
-            self.cursor.execute(insert_sql, (source_id, id, title, text, page_num, created_date))
-            self.mydb.commit()
+                print(f"Starting: {file}\n")
+
+                # Generate the full path of the file
+                file_path = os.path.join(self.source_folder, file)
+
+                # Extract metadata from the filename
+                source_id, id, page_num = self.extract_metadata_from_filename(file)
+
+                # Extract data from the file
+                title, text, created_date = self.extract_data_from_file(file_path)
+
+                # Clean the extracted text
+                text = self.clean_data(text)
+
+                # Write the cleaned text to a new file
+                self.write_cleaned_file(file, text)
+
+                # Prepare the data for insertion or update
+                data = {
+                    'source_id': source_id,
+                    'id': id,
+                    'page_num': page_num,
+                    'title': title,
+                    'text': text,
+                    'created_date': created_date
+                }
+
+                # Insert or update the record in the database
+                self.insert_or_update_record(data)
+
+                print(f"Finished processing file {count} of {total_files}\n")
+
         else:
-            # If a record is found, update it
-            update_sql = "UPDATE writings SET title = %s, body = %s, page_num = %s, created_date = %s WHERE source_id = %s AND id = %s"
-            self.cursor.execute(update_sql, (title, text, page_num, created_date, source_id, id))
-            self.mydb.commit()
+            print("No files found in the source directory.")
 
-def write_clean_file(self, file, text):
+        # Close the database connection after all files have been processed
+        self.close_db_connection()
+
+    def extract_metadata_from_filename(self, file):
         """
-        Write the cleaned text to a new file in the destination folder.
+        This method extracts metadata from a filename. It expects filenames in the format "source_id-id-page_num.txt".
 
-        :param file: The filename
-        :param text: The cleaned text
+        :param file: A string representing the filename to extract metadata from.
+        :returns: A tuple containing the source_id, id, and page_num extracted from the filename.
+        """
+        match = re.match(r'(\d+)-(\d+)-(\d+)\.txt$', file)
+
+        if not match:
+            print(f"Filename '{file}' does not match expected format 'source_id-id-page_num.txt'. Skipping file.")
+            return None, None, None
+
+        return match.groups()
+
+    def extract_data_from_file(self, file_path):
+        """
+        This method extracts data from a file. It expects files where the first line is the title
+        and the last line is the created date.
+
+        :param file_path: A string representing the full path of the file to extract data from.
+        :returns: A tuple containing the title, raw text, and created date.
+        """
+        try:
+            # Open and read the file
+            with open(file_path) as f:
+                text = f.read()
+
+        except Exception as e:
+            print(f"Could not read file {file_path}. Error: {str(e)}")
+            return None, None, None
+
+        # Extract the title and date from the text
+        title, created_date = text.split('\n')[0], text.split('\n')[-1]
+
+        return title, text, created_date
+
+    def clean_data(self, raw_text):
+        """
+        This method cleans the extracted raw text data. It removes leading and trailing whitespaces,
+        reduces multiple newlines to two, and reduces multiple whitespaces to one.
+
+        :param raw_text: A string representing the raw text data to clean.
+        :returns: A string representing the cleaned text data.
+        """
+        raw_text = raw_text.strip()
+
+        raw_text = re.sub(r'\n{3,}', '\n\n', raw_text)
+        raw_text = re.sub(r'\s{2,}', ' ', raw_text)
+
+        return raw_text
+
+    def insert_or_update_record(self, record_data):
+        """
+        This method inserts a new record or updates an existing one in the database.
+
+        :param record_data: A dictionary containing the record data.
+        """
+        sql = """
+        INSERT INTO records (source_id, id, title, text, page_num, created_date)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            text = VALUES(text),
+            page_num = VALUES(page_num),
+            created_date = VALUES(created_date)
+        """
+        val = (record_data['source_id'], record_data['id'], record_data['title'], record_data['text'],
+               record_data['page_num'], record_data['created_date'])
+
+        try:
+            self.cursor.execute(sql, val)
+            self.mydb.commit()
+        except mysql.connector.Error as err:
+            print(f"Something went wrong with the SQL execution: {err}")
+
+    def write_cleaned_file(self, file, text):
+        """
+        This method writes the cleaned text to a new file in the destination folder.
+
+        :param file: A string representing the filename.
+        :param text: A string representing the cleaned text.
         """
         cleaned_file = os.path.join(self.dest_folder, file)
+
         with open(cleaned_file, 'w') as f:
             f.write(text)
+
+    def close_db_connection(self):
+        """
+        This method closes the connection to the MySQL database.
+        """
+        try:
+            self.cursor.close()
+            self.mydb.close()
+            print("Database connection closed.")
+        except mysql.connector.Error as err:
+            print(f"Something went wrong when closing the database connection: {err}")
+
