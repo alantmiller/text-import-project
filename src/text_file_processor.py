@@ -33,38 +33,25 @@ class TextFileProcessor:
         self.source_folder = self.config['folders']['source']
         self.dest_folder = self.config['folders']['destination']
 
-    def process_files(self):
-        """
-        Process all files in the source folder: reading and cleaning the text and handling the database records.
-        """
-        # Loop through all text files in source folder
-        for count, file in enumerate(os.listdir(self.source_folder), start=1):
+def process_files(self):
+    """
+    Process text files located in the source folder.
+    """
+    # Create a cursor to execute SQL commands
+    cursor = self.mydb.cursor()
 
-            # Check if hit limit, if one is specified in the config
-            if 'max_files' in self.config and count > self.config['max_files']:
-                break
+    # Loop through all text files in source folder
+    for count, file in enumerate(os.listdir(self.source_folder), start=1):
+        # Check if hit limit
+        if self.max_files and count > self.max_files:
+            print(f"Reached limit of {self.max_files} files") 
+            break
 
-            # Open the file and read the text
-            with open(os.path.join(self.source_folder, file)) as f:
-                text = f.read()
+        # Process individual file
+        self.process_file(file)
 
-            # Clean the text formatting
-            text = self.clean_text(text)
+    cursor.close()
 
-            # Parse the filename into the necessary variables
-            source_id, id, page_num = self.parse_filename(file)
-
-            # Extract the title and date from the text
-            title, created_date = self.extract_metadata(text)
-
-            # Check if a corresponding record exists in the database and handle accordingly
-            self.handle_database_record(source_id, id, title, text, page_num, created_date)
-
-            # Write the cleaned text to a new file in the destination folder
-            self.write_clean_file(file, text)
-
-        # Close the database cursor once all files have been processed
-        self.cursor.close()
 
     def clean_text(self, text):
         """
