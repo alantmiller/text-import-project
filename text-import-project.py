@@ -69,6 +69,16 @@ try:
         # Parse filename into variables
         print("Parsing filename...")
         filename = file.split('-')
+        if len(filename) != 3:  # Expecting three parts after splitting by '-'
+            print(f"Unexpected filename format: {file}. Skipping this file.")
+            continue
+
+        # Check if parts are numeric
+        if not(filename[0].isdigit() and filename[1].isdigit() and filename[2].split('.')[0].isdigit()):
+            print(f"Non-numeric parts in filename: {file}. Skipping this file.")
+            continue
+
+        # Proceed with extraction only if the filename format is correct and parts are numeric
         source_id, id, page_num = filename[0], filename[1], filename[2].split('.')[0]  # direct assignments
 
         # Extract title and date
@@ -95,10 +105,11 @@ try:
         else:
             # Record exists, update it
             print("Updating record...")
-            update_sql = "
+            update_sql = """
             UPDATE writings
             SET title = %s, body = %s, page_num = %s, created_date = %s
-            WHERE source_id = %s AND id = %s"
+            WHERE source_id = %s AND id = %s
+            """
             
             cursor.execute(update_sql, (title, text, page_num, created_date, source_id, id))
             print("Record updated!\n")
