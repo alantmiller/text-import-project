@@ -9,7 +9,7 @@ class TextFileProcessor:
     Class for processing text files. Handles reading and cleaning the files, as well as inserting and updating records in the database.
     """
 
-    def __init__(self, config_file):
+def __init__(self, config_file):
         """
         Construct a new 'TextFileProcessor' object.
 
@@ -63,7 +63,7 @@ def process_files(self):
         self.process_file(file, file_path)
 
 
-    def process_file(self, file_name, file_path):
+def process_file(self, file_name, file_path):
     """
     Process a single file.
 
@@ -117,7 +117,7 @@ def is_valid_filename(self, file):
     return match is not None
 
     
-    def extract_metadata_from_filename(self, file):
+def extract_metadata_from_filename(self, file):
     """
     Extract metadata from the filename.
 
@@ -167,7 +167,7 @@ def extract_data_from_file(self, file_path):
     return title, text, created_date
 
 
-    def clean_text(self, text):
+def clean_text(self, text):
         """
         Clean the provided text by stripping leading/trailing whitespace and fixing formatting.
 
@@ -179,7 +179,7 @@ def extract_data_from_file(self, file_path):
         text = re.sub(r'\s{2,}', ' ', text)
         return text
 
-    def parse_filename(self, file):
+def parse_filename(self, file):
         """
         Parse the provided filename into the necessary variables.
 
@@ -190,7 +190,7 @@ def extract_data_from_file(self, file_path):
         source_id, id, page_num = filename[0], filename[1], filename[2].split('.')[0]
         return source_id, id, page_num
 
-    def extract_metadata(self, text):
+def extract_metadata(self, text):
         """
         Extract the title and date from the provided text.
 
@@ -200,7 +200,7 @@ def extract_data_from_file(self, file_path):
         title, created_date = text.split('\n')[0], text.split('\n')[-1]
         return title, created_date
 
-    def handle_database_record(self, source_id, id, title, text, page_num, created_date):
+def handle_database_record(self, source_id, id, title, text, page_num, created_date):
         """
         Check if a corresponding record exists in the database. If it does, update it, if not, insert a new record.
 
@@ -225,7 +225,7 @@ def extract_data_from_file(self, file_path):
             self.cursor.execute(update_sql, (title, text, page_num, created_date, source_id, id))
             self.mydb.commit()
 
-    def write_clean_file(self, file, text):
+def write_clean_file(self, file, text):
         """
         Write the cleaned text to a new file in the destination folder.
 
